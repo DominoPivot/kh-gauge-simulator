@@ -46,6 +46,9 @@
         font-size: 0.7rem;
         font-weight: 200;
         margin: 2rem 0;
+    }
+    pre {
+        font: inherit;
         white-space: pre-line;
     }
     .container {
@@ -62,7 +65,8 @@
 </style>
 
 <script type="module">
-    const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
+    const clamp = (val, min, max) => Math.min(Math.max(Number(val) || 0, min), max);
+    const round = val => Math.round(val);
 
     function gaugePath(ir, or, ringWorth, pixelsPerUnit, value) {
         const t = clamp(value, 0, ringWorth) / ringWorth * 1.5 * Math.PI;
@@ -79,87 +83,72 @@
         return `M ${-or} 0 ${outerArc} ${rect} ${innerArc} Z`;
     }
 
-    const $ = id => document.getElementById(id);
-    const svgDocument = $("svgDocument");
-    const hpPath = $("hpPath");
-    const maxHpPath = $("maxHpPath");
-    const mpPath = $("mpPath");
-    const mpSplitter = $("mpSplitter");
-    const maxMpPath = $("maxMpPath");
-    const mpDashLine = $("mpDashLine");
-    const chPath = $("chPath");
-    const gaugeOutline = $("gaugeOutline");
+    import { createApp } from "./petite-vue.es.js";
+    createApp({
+        rawMaxHp: 114,
+        rawHp: 114,
+        rawMaxMp: 19,
+        rawMp: 19,
+        rawCh: 0,
 
-    const state = {
-        maxHp: 114,
-        hp: 114,
-        maxMp: 19,
-        mp: 19,
-        ch: 0,
         pixelsPerMp: 120,
         mpSplitterWidth: 10,
         outlineWidth: 8,
-        chargeMpOverTime: 0,
-        loseHpOverTime: 0,
-    };
 
-    const api = {
+        chargeMpInterval: 0,
+        loseHpInterval: 0,
+
+        get maxHp () { return this.rawMaxHp; },
         set maxHp (value) {
-            state.maxHp = Math.round(clamp(Number(value) || 0, 18, 114));
-            maxHpPath.setAttribute("d", gaugePath(120, 180, 54, state.pixelsPerMp / 6, state.maxHp));
-            if (state.hp > state.maxHp) api.hp = state.maxHp;
-        },
-        set hp (value) {
-            state.hp = Math.round(clamp(Number(value) || 0, 0, state.maxHp));
-            hpPath.setAttribute("d", gaugePath(120, 180, 54, state.pixelsPerMp / 6, state.hp));
-        },
-        set maxMp (value) {
-            state.maxMp = Math.round(clamp(Number(value) || 0, 0, 19));
-            maxMpPath.setAttribute("d", gaugePath(180, 240, 9, state.pixelsPerMp, state.maxMp));
-            if (state.mp > state.maxMp) api.mp = state.maxMp;
-            if (state.ch > state.maxMp) api.ch = state.maxMp;
-        },
-        set mp (value) {
-            state.mp = Math.round(clamp(Number(value) || 0, 0, state.maxMp));
-            mpPath.setAttribute("d", gaugePath(180, 240, 9, state.pixelsPerMp, state.mp));
-        },
-        set ch (value) {
-            state.ch = clamp(Number(value) || 0, 0, state.maxMp);
-            chPath.setAttribute("d", gaugePath(220, 240, 9, state.pixelsPerMp, state.ch));
-        },
-        set pixelsPerMp (value) {
-            state.pixelsPerMp = clamp(Number(value) || 0, state.mpSplitterWidth, 1000);
-            mpDashLine.setAttribute("stroke-dasharray", `${state.mpSplitterWidth} ${state.pixelsPerMp - state.mpSplitterWidth}`);
-            // hack to force rerender
-            api.maxHp += 0;
-            api.hp += 0;
-            api.maxMp += 0;
-            api.mp += 0;
-            api.ch += 0;
-        },
-        set mpSplitterWidth (value) {
-            state.mpSplitterWidth = clamp(Number(value) || 0, 1, 100);
-            mpSplitter.setAttribute("stroke-width", state.mpSplitterWidth);
-            api.pixelsPerMp += 0;
-        },
-        set outlineWidth (value) {
-            state.outlineWidth = clamp(Number(value) || 0, 0, 100);
-            gaugeOutline.setAttribute("stroke-width", state.outlineWidth);
+            this.rawMaxHp = clamp(round(value), 18, 114);
+            this.hp = this.rawHp;
         },
 
-        get maxHp () { return state.maxHp; },
-        get hp () { return state.hp; },
-        get maxMp () { return state.maxMp; },
-        get mp () { return state.mp; },
-        get ch () { return state.ch; },
-        get pixelsPerMp () { return state.pixelsPerMp; },
-        get mpSplitterWidth () { return state.mpSplitterWidth; },
-        get outlineWidth () { return state.outlineWidth; },
+        get hp () { return this.rawHp; },
+        set hp (value) {
+            this.rawHp = clamp(round(value), 0, this.maxHp);
+        },
+
+        get maxMp () { return this.rawMaxMp; },
+        set maxMp (value) {
+            this.rawMaxMp = clamp(round(value), 0, 19);
+            this.mp = this.rawMp;
+            this.ch = this.rawCh;
+        },
+
+        get mp () { return this.rawMp; },
+        set mp (value) {
+            this.rawMp = clamp(round(value), 0, this.maxMp);
+        },
+
+        get ch () { return this.rawCh; },
+        set ch (value) {
+            this.rawCh = clamp(value, 0, this.maxMp);
+        },
+
+        get maxHpPath () {
+            return gaugePath(120, 180, 54, this.pixelsPerMp / 6, this.maxHp);
+        },
+        get hpPath () {
+            return gaugePath(120, 180, 54, this.pixelsPerMp / 6, this.hp);
+        },
+        get maxMpPath () {
+            return gaugePath(180, 240, 9, this.pixelsPerMp, this.maxMp);
+        },
+        get mpPath () {
+            return gaugePath(180, 240, 9, this.pixelsPerMp, this.mp);
+        },
+        get chPath () {
+            return gaugePath(220, 240, 9, this.pixelsPerMp, this.ch);
+        },
+        get mpDashArray () {
+            return `${this.mpSplitterWidth} ${this.pixelsPerMp - this.mpSplitterWidth}`;
+        },
 
         download () {
             const a = document.createElement("a");
             a.hidden = true;
-            a.href= URL.createObjectURL(new Blob([svgDocument.outerHTML], { type: "image/svg+xml" }));
+            a.href = URL.createObjectURL(new Blob([this.$refs.svgDocument.outerHTML], { type: "image/svg+xml" }));
             a.download = "khgauge.svg";
             document.body.appendChild(a);
             a.click();
@@ -167,58 +156,71 @@
         },
 
         spendCh (amount) {
-            if (api.ch >= amount) {
-                api.ch -= amount;
-            } else if (state.mp >= amount) {
-                api.ch += api.mp - amount;
-                api.mp -= 1;
+            if (this.ch >= amount) {
+                this.ch -= amount;
+            } else if (this.mp >= amount) {
+                this.ch += this.mp - amount;
+                this.mp -= 1;
             }
         },
 
         spendMp (amount) {
-            if (api.mp >= amount) {
-                api.mp -= amount;
+            if (this.mp >= amount) {
+                this.mp -= amount;
                 setTimeout(() => {
-                    if (api.ch >= api.mp + 1) {
-                        api.mp += 1;
-                        api.ch -= api.mp;
+                    if (this.ch >= this.mp + 1) {
+                        this.mp += 1;
+                        this.ch -= this.mp;
                     }
                 }, 50);
             }
         },
 
-        toggleCharge (checked) {
-            clearInterval(state.chargeMpOverTime);
-            if (checked) {
-                state.chargeMpOverTime = setInterval(() => {
-                    api.ch += 0.1;
-                    if (api.ch >= api.mp + 1) {
-                        api.mp += 1;
-                        api.ch -= api.mp;
+        toggleCharge (event) {
+            clearInterval(this.chargeMpInterval);
+            if (event.currentTarget.checked) {
+                this.chargeMpInterval = setInterval(() => {
+                    this.ch += 0.1;
+                    if (this.ch >= this.mp + 1) {
+                        this.mp += 1;
+                        this.ch -= this.mp;
                     }
                 }, 10);
             }
         },
 
-        togglePoison (checked) {
-            clearInterval(state.loseHpOverTime);
-            if (checked) {
-                state.loseHpOverTime = setInterval(() => {
-                    api.hp -= 1;
+        togglePoison (event) {
+            clearInterval(this.loseHpInterval);
+            if (event.currentTarget.checked) {
+                this.loseHpInterval = setInterval(() => {
+                    this.hp -= 1;
                 }, 50);
             }
         },
 
-        prayDonald() {
-            if (api.hp / api.maxHp > 0.3) alert("You didn't customize Donald's behavior to heal outside of emergencies.");
-            else if (Math.random() < 0.5) api.hp += 100;
-            else if (Math.random() < 0.9) alert("Donald was KO and could not heal you.");
-            else alert("Donald was out of MP.");
+        prayDonald () {
+            if (this.hp / this.maxHp > 0.3)
+                alert("You didn't customize Donald's behavior to heal outside of emergencies.");
+            else if (Math.random() < 0.5)
+                this.hp += 100;
+            else if (Math.random() < 0.9)
+                alert("Donald was KO and could not heal you.");
+            else
+                alert("Donald was out of MP.");
         },
-    };
 
-    api.mpSplitterWidth += 0; // hack to force rerender
-    globalThis.kh = api;
+        newGame () {
+            this.rawHp = this.rawMaxHp = 18;
+            this.rawMp = this.rawMaxMp = 1;
+            this.rawCh = 0;
+        },
+
+        bestStats () {
+            this.rawHp = this.rawMaxHp = 114;
+            this.rawMp = this.rawMaxMp = 19;
+            this.rawCh = 0;
+        },
+    }).mount("main");
 </script>
 
 <header class="container">
@@ -227,7 +229,7 @@
 </header>
 
 <main>
-<svg id="svgDocument" viewBox="-1220 -250 1500 500" width="1500" height="500" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="-1220 -250 1500 500" width="1500" height="500" xmlns="http://www.w3.org/2000/svg" ref="svgDocument">
     <defs>
         <radialGradient id="hpRadialGradient" gradientUnits="userSpaceOnUse" cx="0" cy="0" fr="120" r="180">
             <stop stop-color="rgb(174,213,8)" />
@@ -256,19 +258,15 @@
             <stop stop-color="rgb(255,169,5)" offset="1" />
         </linearGradient>
 
-        <clipPath id="hpClipPath">
-            <path id="hpPath" d="M -180 0 A 180 180 0 1 1 0 180 H -240 V 120 H 0 A 120 120 0 1 0 -120 0 Z" />
-        </clipPath>
+        <clipPath id="hpClipPath"><path :d="hpPath" /></clipPath>
         <mask id="maxHpMask" fill="white">
-            <path id="maxHpPath" d="M -180 0 A 180 180 0 1 1 0 180 H -240 V 120 H 0 A 120 120 0 1 0 -120 0 Z" />
+            <path id="maxHpPath" :d="maxHpPath" />
         </mask>
 
-        <clipPath id="mpClipPath">
-            <path id="mpPath" d="M -240 0 A 240 240 0 1 1 0 240 H -220 V 180 H 0 A 180 180 0 1 0 -180 0 Z" />
-        </clipPath>
-        <line id="mpSplitter" stroke="black" stroke-width="10" x2="-240" />
+        <clipPath id="mpClipPath"><path :d="mpPath" /></clipPath>
+        <line id="mpSplitter" stroke="black" :stroke-width="mpSplitterWidth" x2="-240" />
         <mask id="maxMpMask" fill="white">
-            <path id="maxMpPath" d="M -240 0 A 240 240 0 1 1 0 240 H -230 V 180 H 0 A 180 180 0 1 0 -180 0 Z" />
+            <path id="maxMpPath" :d="maxMpPath" />
             <use href="#mpSplitter" transform="rotate(30)" />
             <use href="#mpSplitter" transform="rotate(60)" />
             <use href="#mpSplitter" transform="rotate(90)" />
@@ -277,13 +275,10 @@
             <use href="#mpSplitter" transform="rotate(180)" />
             <use href="#mpSplitter" transform="rotate(210)" />
             <use href="#mpSplitter" transform="rotate(240)" />
-            <line id="mpDashLine" stroke="black" stroke-width="60" stroke-dasharray="10 110" y1="210" y2="210" x2="-100%" />
+            <line stroke="black" stroke-width="60" :stroke-dasharray="mpDashArray" y1="210" y2="210" x2="-100%" />
         </mask>
 
-        <clipPath id="chClipPath">
-            <path id="chPath" d="M -240 0 A 240 240 0 1 1 0 240 H -220 V 220 H 0 A 220 220 0 1 0 -220 0 Z" />
-        </clipPath>
-
+        <clipPath id="chClipPath"><path :d="chPath" /></clipPath>
         <rect id="lGradRect" x="-100%" width="100%" height="50%" />
     </defs>
 
@@ -307,7 +302,7 @@
         <use href="#lGradRect" fill="url(#chLinearGradient)" />
     </g>
 
-    <g id="gaugeOutline" fill="none" stroke="black" stroke-width="8">
+    <g id="gaugeOutline" fill="none" stroke="black" :stroke-width="outlineWidth">
         <use href="#maxHpPath" />
         <use href="#maxMpPath" />
     </g>
@@ -315,58 +310,74 @@
 
 <div>
     <menu class="container">
-        <li><label>Max HP <input onchange="kh.maxHp = this.value" type="number" min="18" max="114" step="3" value="114"></label>
-        <li><label>Max MP <input onchange="kh.maxMp = this.value" type="number" min="0" max="19" step="1" value="19"></label>
-        <li><label>HP <input onchange="kh.hp = this.value" type="number" min="0" max="114" step="1" value="114"></label>
-        <li><label>MP <input onchange="kh.mp = this.value; kh.ch = 0;" type="number" min="0" max="19" step="1" value="19"></label>
-        <li><button type="button" onclick="kh.hp = kh.maxHp = 18; kh.mp = kh.maxMp = 1">New Game</button>
-        <li><button type="button" onclick="kh.hp = kh.maxHp = 114; kh.mp = kh.maxMp = 19">Best Stats</button>
+        <li><label>Max HP <input v-model.lazy="maxHp" type="number" min="18" max="114"></label>
+        <li><label>Max MP <input v-model.lazy="maxMp" type="number" min="0" max="19"></label>
+        <li><label>HP <input v-model.lazy="hp" type="number" min="0" :max="maxHp"></label>
+        <li><label>MP <input v-model.lazy="mp" type="number" min="0" :max="maxMp"></label>
+        <li><button type="button" @click="newGame">New Game</button>
+        <li><button type="button" @click="bestStats">Best Stats</button>
     </menu>
 </div>
 
 <div class="magic-background">
     <menu class="container">
-        <li><button type="button" onclick="kh.spendCh(0.5)">Spend 0.5 charge</button>
-        <li><button type="button" onclick="kh.spendCh(1)">Spend 1 charge</button>
-        <li><button type="button" onclick="kh.spendMp(1)">Spend 1 MP</button>
-        <li><button type="button" onclick="kh.spendMp(2)">Spend 2 MP</button>
-        <li><button type="button" onclick="kh.spendMp(3)">Spend 3 MP</button>
-        <li><button type="button" onclick="kh.mp = 0; kh.ch = 0">Spend All MP</button>
-        <li><label><input type="checkbox" onclick="kh.toggleCharge(this.checked)"> Charge MP over time</button>
+        <li><button type="button" @click="spendCh(0.5)">Spend 0.5 charge</button>
+        <li><button type="button" @click="spendCh(1)">Spend 1 charge</button>
+        <li><button type="button" @click="spendMp(1)">Spend 1 MP</button>
+        <li><button type="button" @click="spendMp(2)">Spend 2 MP</button>
+        <li><button type="button" @click="spendMp(3)">Spend 3 MP</button>
+        <li><button type="button" @click="mp = 0; ch = 0">Spend All MP</button>
+        <li><label><input type="checkbox" @click="toggleCharge"> Charge MP over time</button>
     </menu>
 </div>
 
 <div class="items-background">
     <menu class="container">
-        <li><button type="button" onclick="kh.hp += 30">Potion</button>
-        <li><button type="button" onclick="kh.hp += 60">Hi-Potion</button>
-        <li><button type="button" onclick="kh.prayDonald()">Pray to Donald</button>
-        <li><button type="button" onclick="kh.hp = 114; kh.mp = 19;">Elixir</button>
-        <li><button type="button" onclick="kh.hp = 114; if (kh.mp < kh.maxMp) kh.ch = 0; kh.mp = 19">Rest</button>
-        <li><label><input type="checkbox" onclick="kh.togglePoison(this.checked)"> Lose HP over time</button>
+        <li><button type="button" @click="hp += 30">Potion</button>
+        <li><button type="button" @click="hp += 60">Hi-Potion</button>
+        <li><button type="button" @click="prayDonald()">Pray to Donald</button>
+        <li><button type="button" @click="hp = maxHp; mp = maxMp;">Elixir</button>
+        <li><button type="button" @click="hp = maxHp; if (mp !== maxMp) ch = 0; mp = maxMp">Rest</button>
+        <li><label><input type="checkbox" @click="togglePoison"> Lose HP over time</button>
     </menu>
 </div>
 
 <menu class="container">
-    <li><label>Outlines <input oninput="kh.outlineWidth = this.value" type="number" min="0" max="100" step="1" value="8"></label>
-    <li><label>MP gaps <input oninput="kh.mpSplitterWidth = this.value" type="number" min="0" max="100" step="1" value="10"></label>
-    <li><label>MP rectangle width <input oninput="kh.pixelsPerMp = this.value" type="number" min="1" max="1000" step="1" value="120"></label>
-    <li><button type="button" onclick="kh.download()">Download SVG</button>
+    <li><label>Outlines <input v-model="outlineWidth" type="number" min="0" max="100"></label>
+    <li><label>MP gaps <input v-model="mpSplitterWidth" type="number" min="0" max="100"></label>
+    <li><label>MP rectangle width <input v-model="pixelsPerMp" type="number" min="1" max="1000"></label>
+    <li><button type="button" @click="download">Download SVG</button>
 </menu>
 </main>
 
 <footer class="container">
-This software was made from original assets, and imitates elements of the Kingdom Hearts video game for illustrative purposes only. It is not an official Kingdom Hearts product, and is not endorsed by its trademark owners or copyright holders.
+<p>
+    This software was made from original assets, and imitates elements of the Kingdom Hearts video game for illustrative purposes only. It is not an official Kingdom Hearts product, and is not endorsed by its trademark owners or copyright holders.
+</p>
+<p>
+    Feel free to use it to produce media for your own articles, guides or video essays for the Kingdom Hearts community. Accreditation is appreciated, but not necessary. The source code is available under MIT license.
+</p>
 
-Feel free to use it to produce media for your own articles, guides or video essays for the Kingdom Hearts community. Accreditation is appreciated, but not necessary. The source code is available under MIT license.
+<details>
+    <summary>Changelog</summary>
+    <p><time>2025-04-24</time> Implemented two-way binding for the form controls using petite-vue.</p>
+</details>
 
-<details><summary>License Information</summary>
-© 2025 DominoPivot
+<details>
+    <summary>License Information</summary>
+    <pre>© 2025 DominoPivot
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</pre>
+</details>
+
+<details>
+    <summary>Third party credits</summary>
+    <p>
+        Made with the petite-vue framework used under MIT license. <a href="petite-vue.es.js">See minified source for the full notice.</a>.
+    </p>
 </details>
 </footer>
