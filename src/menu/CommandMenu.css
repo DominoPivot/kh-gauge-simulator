@@ -11,6 +11,7 @@
 }
 
 .CommandList {
+    background: linear-gradient(to right, transparent, var(--detail));
     display: flex;
     flex-flow: column nowrap;
     gap: 0;
@@ -19,10 +20,10 @@
 .CommandMenuHeading {
     background: black;
     border: 2px solid var(--detail);
-    border-right-width: 1em;
-    border-radius: 1em 1em 0 0;
+    border-radius: 1em 0;
     color: var(--highlight);
     font: 18px KHGummi, sans-serif;
+    margin-right: 1em;
     padding: 2px .5em;
     position: relative;
     user-select: none;
