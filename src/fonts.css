@@ -1,0 +1,42 @@
+@font-face {
+    font-family: "KHGummi";
+    src:
+        local("KHGummi"),
+        url("/fonts/KHGummi.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "KHMenu";
+    src:
+        local("KHMenu"),
+        url("/fonts/KHMenu.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "KHMenu";
+    src:
+        local("KHMenu"),
+        url("/fonts/KHMenuBold.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: "KHMenu";
+    src:
+        local("KHMenu"),
+        url("/fonts/KHMenuItalic.woff2") format("woff2");
+    font-style: italic;
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "KHMenu";
+    src:
+        local("KHMenu"),
+        url("/fonts/KHMenuBoldItalic.woff2") format("woff2");
+    font-style: italic;
+    font-weight: 700;
+}

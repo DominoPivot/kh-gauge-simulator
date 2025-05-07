@@ -1,0 +1,70 @@
+@import "fonts.css";
+
+*,
+*::before,
+*::after {
+    box-sizing: inherit;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+html {
+    box-sizing: border-box;
+    color-scheme: dark light;
+    font: 18px KHMenu, sans-serif;
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body > header {
+    align-items: center;
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0 2em;
+}
+
+h1 {
+    font: 2rem KHGummi, sans-serif;
+}
+
+svg {
+    display: block;
+    height: auto;
+    margin: 1rem auto;
+    max-width: 100%;
+}
+
+body > footer {
+    font: 0.7rem "Atkinson Hyperlegible Next", sans-serif;
+    font-weight: 200;
+    margin: 2rem 0;
+}
+
+details {
+    margin-block: 1rem;
+}
+
+summary {
+    cursor: pointer;
+}
+
+pre {
+    border: currentColor 2px inset;
+    font: inherit;
+    margin-inline: 1em;
+    padding: .5em;
+    width: fit-content;
+    white-space: pre-line;
+}
+
+.container {
+    margin: 0 auto;
+    max-width: 1000px;
+    padding: 1rem;
+}
