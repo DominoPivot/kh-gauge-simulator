@@ -1,10 +1,10 @@
-import { useGaugeSim } from "../context/GaugeSimContext.js";
+import { useKHState } from "../context/KHStateContext.js";
 import { Gauge } from "./Gauge.js";
 import { GaugeFill } from "./GaugeFill.js";
 import { MpSplitters } from "./MpSplitters.js";
 
 export function MpGauge () {
-    const { maxMp, mp, ch } = useGaugeSim()!;
+    const { maxMp, mp, ch } = useKHState()!;
 
     return (
         <Gauge

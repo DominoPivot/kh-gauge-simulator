@@ -1,15 +1,14 @@
 import { useId } from "react";
-import { useSVGDefs } from "../context/SVGDefsContext.js";
+import { DefsPortal } from "../context/DefsPortal.js";
 
 export function MpSplitters () {
-    const defs = useSVGDefs();
     const id = useId();
     const href = `#${id}`;
 
     return <>
-        {defs(
+        <DefsPortal>
             <line id={id} x2={-240} strokeWidth={10} />
-        )}
+        </DefsPortal>
         <g stroke="rgb(24,28,42)">
             <use href={href} transform="rotate(30)" />
             <use href={href} transform="rotate(60)" />

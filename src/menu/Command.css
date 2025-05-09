@@ -1,0 +1,45 @@
+.Command {
+    align-items: baseline;
+    background: black;
+    border: 2px solid var(--detail);
+    border-left-width: .5em;
+    border-radius: 0 1em 1em 0;
+    color: rgb(230, 230, 230);
+    display: flex;
+    flex-flow: row nowrap;
+    font: 18px KHMenu;
+    justify-content: space-between;
+    margin: 0;
+    padding: 0.1em 1em;
+    text-align: left;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.Command:hover,
+.Command:focus-visible {
+    background: linear-gradient(to bottom, black 50%, var(--detail));
+    border-color: var(--highlight);
+    outline: none;
+    transform: translate(0.6em);
+}
+
+.Command:active {
+    transform: translate(0.6em, 2px);
+}
+
+.Command:disabled {
+    color: rgb(115, 115, 115);
+}
+
+.Command--pressed-false::after,
+.Command--pressed-true::after {
+    content: "ON";
+    display: inline-block;
+    font: 0.5em KHGummi, sans-serif;
+    margin-left: 1em;
+    visibility: hidden;
+}
+.Command--pressed-true::after {
+    visibility: visible;
+}

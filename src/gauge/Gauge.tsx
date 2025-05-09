@@ -1,7 +1,7 @@
 import { useId, type PropsWithChildren } from "react";
-import { useSVGDefs } from "../context/SVGDefsContext.js";
 import { GaugeFill } from "./GaugeFill.js";
 import { GaugePath } from "./GaugePath.js";
+import { DefsPortal } from "../context/DefsPortal.js";
 
 type GaugeProps = PropsWithChildren<{
     r1: number,
@@ -16,14 +16,12 @@ type GaugeProps = PropsWithChildren<{
 
 export function Gauge ({ max, value, children, c1, c2, ...props }: GaugeProps) {
     const id = useId();
-    const defs = useSVGDefs();
-
     return <>
-        {defs(
+        <DefsPortal>
             <clipPath id={`${id}-clip`}>
                 <GaugePath id={`${id}-path`} value={max} {...props} />
             </clipPath>
-        )}
+        </DefsPortal>
 
         <use href={`#${id}-path`} fill="rgb(24,28,42)" stroke="none" />
         <g clipPath={`url(#${id}-clip)`}>

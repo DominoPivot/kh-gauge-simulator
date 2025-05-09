@@ -10,14 +10,14 @@
     flex: 0.25 0.25 fit-content;
 }
 
-.CommandList {
+.CommandMenu__list {
     background: linear-gradient(to right, transparent, var(--detail));
     display: flex;
     flex-flow: column nowrap;
     gap: 0;
 }
 
-.CommandMenuHeading {
+.CommandMenu__heading {
     background: black;
     border: 2px solid var(--detail);
     border-radius: 1em 0;
@@ -25,50 +25,7 @@
     font: 18px KHGummi, sans-serif;
     margin-right: 1em;
     padding: 2px .5em;
-    position: relative;
     user-select: none;
-}
-
-.Command {
-    background: black;
-    border: 2px solid var(--detail);
-    border-left-width: .5em;
-    border-radius: 0 1em 1em 0;
-    color: rgb(230, 230, 230);
-    display: block;
-    font: 18px KHMenu;
-    margin: 0;
-    padding: 0.1em 1em;
-    position: relative;
-    text-align: left;
-    user-select: none;
-    white-space: nowrap;
-}
-
-.Command:hover,
-.Command:focus-visible {
-    background: linear-gradient(to bottom, black 50%, var(--detail));
-    border-color: var(--highlight);
-    outline: none;
-    transform: translate(0.6em);
-}
-
-.Command:disabled {
-    color: rgb(115, 115, 115);
-}
-
-.Command:has(>.Command__pressedIndicator) {
-    align-items: baseline;
-    display: flex;
-    flex-flow: row nowrap;
-    justify-content: space-between;
-}
-
-.Command__pressedIndicator {
-    display: inline-block;
-    font: 0.5em KHGummi, sans-serif;
-    text-align: center;
-    width: 3em;
 }
 
 .passive-palette {

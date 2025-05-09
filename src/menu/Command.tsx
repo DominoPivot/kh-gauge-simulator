@@ -1,56 +1,24 @@
-import type { ComponentPropsWithoutRef } from "react";
-import { useGaugeSim, useGaugeSimDispatch } from "../context/GaugeSimContext.js";
+import { type PropsWithChildren } from "react";
+import type { KHAction } from "../actions.js";
+import { useKHDispatch, useKHState } from "../context/KHStateContext.js";
+import "./Command.css";
 
-export type CommandProps = ComponentPropsWithoutRef<"button"> & {
-    hpGain?: number,
-    hpLoss?: number,
-    mpGain?: number,
-    mpLoss?: number,
-    chGain?: number,
-    chLoss?: number,
+type CommandProps = PropsWithChildren<{
+    action?: KHAction,
+    disabled?: boolean,
+    pressed?: boolean,
+    onClick?: () => void,
+}>;
 
-    secondChance?: boolean,
-    clearCh?: boolean,
-    balance?: boolean,
-};
+export function Command ({ action, disabled, pressed, onClick, children }: CommandProps) {
+    const state = useKHState()!;
+    const dispatch = useKHDispatch()!;
 
-export function Command ({
-    hpGain = 0,
-    hpLoss = 0,
-    mpGain = 0,
-    mpLoss = 0,
-    chGain = 0,
-    chLoss = 0,
-    secondChance = false,
-    clearCh = false,
-    balance = true,
-    disabled,
-    onClick,
-    children,
-    ...buttonProps
-}: CommandProps) {
-    const { mp, ch } = useGaugeSim()!;
-    const dispatch = useGaugeSimDispatch()!;
-
-    disabled ??= mpLoss > mp || chLoss > mp + ch;
-    onClick ??= () => {
-        if (hpGain)
-            dispatch({ type: "hpGain", amount: hpGain });
-        else if (hpLoss)
-            dispatch({ type: "hpLoss", amount: hpLoss, secondChance });
-
-        if (mpGain)
-            dispatch({ type: "mpGain", amount: mpGain, clearCh });
-        else if (mpLoss)
-            dispatch({ type: "mpLoss", amount: mpLoss, balance });
-        else if (chGain)
-            dispatch({ type: "chGain", amount: chGain, balance });
-        else if (chLoss)
-            dispatch({ type: "chLoss", amount: chLoss, balance });
-    };
+    disabled ??= !(action?.condition?.(state) ?? true);
+    onClick ??= () => action && dispatch(action);
 
     return (
-        <button type="button" className="Command" onClick={onClick} disabled={disabled} {...buttonProps}>
+        <button type="button" className={`Command Command--pressed-${pressed}`} aria-pressed={pressed} disabled={disabled} onClick={onClick}>
             {children}
         </button>
     );

@@ -1,8 +1,8 @@
-import { useGaugeSim } from "../context/GaugeSimContext.js";
+import { useKHState } from "../context/KHStateContext.js";
 import { Gauge } from "./Gauge.js";
 
 export function HpGauge () {
-    const { maxHp, hp } = useGaugeSim()!;
+    const { maxHp, hp } = useKHState()!;
 
     return (
         <Gauge
